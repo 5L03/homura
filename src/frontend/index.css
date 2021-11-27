@@ -1,3 +1,14 @@
 #control {
   margin-bottom: 10px;
 }
+#terminal {
+  position: fixed;
+  width: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  visibility: hidden;
+}
+#player {
+  width: 100%;
+}

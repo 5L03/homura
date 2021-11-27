@@ -1,5 +1,4 @@
 const terminalElement = document.getElementById("terminal")
-terminalElement.style.visibility = "visible"
 const term = new Terminal({cursorBlink: true})
 
 // xterm
@@ -19,3 +18,14 @@ function switchVisible() {
 		terminalElement.style.visibility = "visible"
 	}
 }
+
+// APlayer
+const ap = new APlayer({
+	container: document.getElementById('player'),
+	audio: [{
+		name: 'name',
+		artist: 'artist',
+		url: 'url.mp3',
+		cover: 'cover.jpg',
+	}]
+});
