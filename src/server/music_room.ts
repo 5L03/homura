@@ -1,17 +1,27 @@
 import { hlog } from "./common";
 import { Listener } from "./listener"
 
+type Music = {
+	name: string,
+	artist: string,
+	url: string,
+	cover: string,
+	lyric: string,
+}
+
 class MusicRoom {
 	private static readonly SyncInterval: number = 5
 
 	readonly name: string
-	private readonly listeners: Map<string, Listener>;
+	private readonly listeners: Map<string, Listener>
 	private readonly operators: Set<string>
+	private readonly playlist: Map<string, Music>
 
 	constructor(name: string) {
 		this.name = name
 		this.listeners = new Map<string, Listener>()
 		this.operators = new Set<string>()
+		this.playlist = new Map<string, Music>()
 	}
 
 	// JoinListener adds a new listener with given nickname into this music room.
@@ -33,8 +43,24 @@ class MusicRoom {
 		this.operators.add(nick)
 		hlog(`<${nick}> joins <${this.name}> as operator.`)
 	}
+
+	// IsOperator checks where a given nickname is operator or not.
+	IsOperator(nick: string): boolean {
+		return this.operators.has(nick)
+	}
+
+	// CheckSong checks if the given song has already been in the playlist.
+	CheckSong(songmid: string): boolean {
+		return this.playlist.has(songmid)
+	}
+
+	// AddSong adds a possibly new song to the playlist.
+	AddSong(songmid: string, song: Music): void {
+		this.playlist.set(songmid, song)
+	}
 }
 
 export {
-	MusicRoom
+	MusicRoom,
+	Music,
 }

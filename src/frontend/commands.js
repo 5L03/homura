@@ -1,5 +1,6 @@
 let nickname = ""
 let roomname = ""
+const songmidMap = new Map()
 
 async function join(term, argv) {
 	if (argv.length != 3) {
@@ -92,14 +93,53 @@ async function srch(term, argv) {
 		const song = list[i]
 		term.write(`\x1b[38;5;3m${song.songmid} \x1b[38;5;51m${song.songname} `)
 		const singers = song.singer
-		term.write("\x1b[38;5;165m")
+		let allSingers = ""
 		for (let singer of singers) {
-			term.write(singer.name + ", ")
+			allSingers += singer.name + ", "
 		}
-		term.writeln(`\x1b[38;5;226m${song.albumname}`)
+		allSingers = allSingers.substr(0, allSingers.length - 2)
+		term.writeln(`\x1b[38;5;165m${allSingers} \x1b[38;5;226m${song.albumname}`)
+		song.singer = allSingers
+		songmidMap.set(song.songmid, song)
 	}
 
 	term.write("\x1b[0m")
+}
+
+async function adds(term, argv) {
+	if (argv.length != 2) {
+		term.writeln("usage: adds <songmid>")
+		return
+	}
+
+	if (!songmidMap.has(argv[1])) {
+		term.writeln("Please use 'srch' first.")
+		return
+	}
+	const song = songmidMap.get(argv[1])
+	console.log(song)
+
+	let res
+	try {
+		res = await axios.post("/api/add", {
+			nick: nickname,
+			name: roomname,
+			songname: song.songname,
+			artist: song.singer,
+			songmid: song.songmid,
+			mediamid: song.strMediaMid,
+		})
+	}
+	catch(e) {
+		term.writeln(e.toString())
+		return
+	}
+
+	res = res.data
+	if (res.errcode !== 0) {
+		term.writeln(`Server return errcode ${res.errcode}`)
+		return
+	}
 }
 
 function networkError(response) {

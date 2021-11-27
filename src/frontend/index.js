@@ -1,4 +1,5 @@
 const terminalElement = document.getElementById("terminal")
+terminalElement.style.visibility = "visible"
 const term = new Terminal({cursorBlink: true})
 const ps = "$ "
 let input = ""
@@ -9,6 +10,7 @@ let executing = false
 commands.set("join", join)
 commands.set("setc", setc)
 commands.set("srch", srch)
+commands.set("adds", adds)
 
 // xterm handle keystroke
 term.onData(async data => {
