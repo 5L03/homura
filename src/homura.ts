@@ -1,18 +1,13 @@
 import express from "express"
 
-console.log("Hello world!")
 if (process.env.NODE_ENV == "production") {
-	console.log("production!")
-}
-else {
-	console.log("debug")
+	console.warn("Launched as production env!!!!")
 }
 
 const app = express()
 
-app.get("/", (req, res) => {
-	res.send("Hello from Homura!")
-})
+// Serve the single page website.
+app.use("/", express.static("src/frontend"))
 
 const PORT = 8000
 app.listen(PORT, () => {
