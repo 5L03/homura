@@ -7,6 +7,8 @@ let executing = false
 
 // register all commands
 commands.set("join", join)
+commands.set("setc", setc)
+commands.set("srch", srch)
 
 // xterm handle keystroke
 term.onData(async data => {
@@ -49,7 +51,12 @@ term.open(terminalElement)
 prompt()
 
 async function runCommand(cmd) {
-	let argv = cmd.split(" ").filter(e => e.length > 0)
+	let argv = splitCmd(cmd)
+	if (!argv) {
+		term.writeln("Invalid syntax")
+		return
+	}
+	console.log(argv)
 	if (argv.length == 0) {
 		return
 	}
@@ -66,6 +73,51 @@ async function runCommand(cmd) {
 
 function prompt() {
 	term.write(ps)
+}
+
+function splitCmd(cmd) {
+	let ret = []
+	let spaceCmd = cmd + " "
+	let acc = ""
+	let state = 0
+	for (let c of spaceCmd) {
+		switch (state) {
+		case 0:
+			if (c === "'") {
+				state = 2
+			}
+			else if (c !== " ") {
+				state = 1
+				acc = c
+			}
+			break
+		case 1:
+			if (c === " ") {
+				ret.push(acc)
+				state = 0
+				acc = ""
+			}
+			else {
+				acc += c
+			}
+			break
+		case 2:
+			if (c === "'") {
+				ret.push(acc)
+				state = 0
+				acc = ""
+			}
+			else {
+				acc += c
+			}
+			break
+		}
+	}
+
+	if (state == 2) {
+		return null
+	}
+	return ret
 }
 
 // control button
