@@ -4,16 +4,15 @@
     <meta charset="utf-8">
     <title>小焰 🔥</title>
     <link rel="stylesheet" href="index.css" type="text/css">
-    <link rel="stylesheet" href="xterm.min.css" type="text/css">
-    <link rel="stylesheet" href="APlayer.min.css" type="text/css">
-    <script src="xterm.min.js"></script>
-    <script src="APlayer.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/combine/npm/aplayer@1.10.1/dist/APlayer.min.css,npm/xterm@4.15.0/css/xterm.min.css">
+    <script src="https://cdn.jsdelivr.net/combine/npm/aplayer@1.10.1,npm/xterm@4.15.0,npm/axios@0.24.0"></script>
   </head>
   <body>
     <button type="button" id="control" onclick="switchVisible()">控制台开关</button>
     <div id="terminal"></div>
     <div id="player"></div>
 
+    <script src="commands.js"></script>
     <script src="index.js"></script>
   </body>
 </html>

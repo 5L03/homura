@@ -1,3 +1,4 @@
+import { hlog } from "./common";
 import { Listener } from "./listener"
 
 class MusicRoom {
@@ -17,10 +18,12 @@ class MusicRoom {
 	// If the nickname is already in use, it will return false. Otherwise true.
 	JoinListener(nick: string): boolean {
 		if (this.listeners.has(nick)) {
+			hlog(`Repeated nickname <${nick}> wants to join <${this.name}> as listener.`)
 			return false
 		}
 
 		this.listeners.set(nick, new Listener(nick))
+		hlog(`<${nick}> joins <${this.name}> as listener.`)
 		return true
 	}
 
@@ -28,6 +31,7 @@ class MusicRoom {
 	// if not exists.
 	JoinOperator(nick: string): void {
 		this.operators.add(nick)
+		hlog(`<${nick}> joins <${this.name}> as operator.`)
 	}
 }
 
