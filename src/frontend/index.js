@@ -5,6 +5,7 @@ const ps = "$ "
 let input = ""
 const commands = new Map()
 let executing = false
+let currentInteruptResolver = null
 
 // register all commands
 commands.set("join", join)
@@ -15,12 +16,16 @@ commands.set("adds", adds)
 // xterm handle keystroke
 term.onData(async data => {
 	if (executing) {
+		if (data == "\u0003") {
+			sendInteruptSignal()
+		}
 		return
 	}
 	for (let e of data) {
 		switch(e) {
 		case "\u0003":	// Ctrl+C
 			term.writeln("^C")
+			input = ""
 			prompt()
 			break
 		case "\r":
@@ -53,7 +58,7 @@ term.open(terminalElement)
 prompt()
 
 async function runCommand(cmd) {
-	let argv = splitCmd(cmd)
+	const argv = splitCmd(cmd)
 	if (!argv) {
 		term.writeln("Invalid syntax")
 		return
@@ -67,14 +72,37 @@ async function runCommand(cmd) {
 		term.writeln("Command not found.")
 		return
 	}
-	executing = true
-	let handler = commands.get(argv[0])
-	await handler(term, argv)
-	executing = false
+	beginExecute()
+	const handler = commands.get(argv[0])
+	const interuptPromise = new Promise((resolve, reject) => {
+		currentInteruptResolver = resolve
+	})
+	const res = await Promise.race([handler(term, argv), interuptPromise])
+	if (res === "interupt") {
+		term.writeln("Command interupted.")
+	}
+	else {
+		currentInteruptResolver()
+	}
+	endExecute()
 }
 
 function prompt() {
 	term.write(ps)
+}
+
+function beginExecute() {
+	executing = true
+	term.setOption("cursorBlink", false)
+}
+
+function endExecute() {
+	term.setOption("cursorBlink", true)
+	executing = false
+}
+
+function sendInteruptSignal() {
+	currentInteruptResolver("interupt")
 }
 
 function splitCmd(cmd) {
