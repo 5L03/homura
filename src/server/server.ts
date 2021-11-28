@@ -1,5 +1,5 @@
 import { Express } from "express"
-import { hlog } from "./common";
+import { herror, hlog } from "./common";
 import { MusicRoom, Music } from "./music_room"
 const qqMusic = require('qq-music-api');
 
@@ -69,16 +69,19 @@ function setupApi(app: Express) {
 		hlog(`searches <${keyword}>`)
 		const response = await qqMusic.api("search", {key: keyword, pageSize: 10})
 		const list: any[] = response.data.list
+
+		const newList = list.map(e => ({
+			albummid: e.albummid,
+			albumname: e.albumname,
+			singer: e.singer.map((s:{mid: string, name: string}) => ({mid: s.mid, name: s.name})),
+			songmid: e.songmid,
+			songname: e.songname,
+			strMediaMid: e.strMediaMid,
+		}))
+
 		res.send({
 			errcode: 0,
-			list: list.map(e => ({
-				albummid: e.albummid,
-				albumname: e.albumname,
-				singer: e.singer.map((s:{mid: string, name: string}) => ({mid: s.mid, name: s.name})),
-				songmid: e.songmid,
-				songname: e.songname,
-				strMediaMid: e.strMediaMid,
-			}))
+			list: newList,
 		})
 	})
 
@@ -88,17 +91,18 @@ function setupApi(app: Express) {
 	// 2: Room not exists.
 	// 3: Not operator.
 	// 4: Song already exists in this room.
+	// 5: Cannot get response from QQMusic.
+	// 6: Cannot get URL.
+	// 7: Unexpected data format from QQMusic.
 	app.post("/api/add", async (req, res) => {
 		const body: {
 			nick: string,
 			name: string,
-			songname: string,
-			artist: string,
 			songmid: string,
 			mediamid: string,
 		} = req.body
 
-		if (!body.nick || !body.name || !body.songname || !body.artist || !body.songmid || !body.mediamid) {
+		if (!body.nick || !body.name || !body.songmid || !body.mediamid) {
 			res.send({errcode: 1})
 			return
 		}
@@ -120,24 +124,51 @@ function setupApi(app: Express) {
 		}
 
 		const requests = [
+			qqMusic.api("song", {songmid: body.songmid}),
 			qqMusic.api("song/url", {id: body.songmid, mediaId: body.mediamid}),
 			qqMusic.api("lyric", {songmid: body.songmid}),
 		]
-		let responses
+		let responses: any[]
 		try {
 			responses = await Promise.all(requests)
 		}
 		catch(e) {
 			console.error(e)
+			res.send({errcode: 5})
+			return
+		}
+
+		if (!responses[0].data || !responses[1].data || !responses[2].data) {
+			res.send({errcode: 6})
+			return
+		}
+
+		let songname: string
+		let allSingers: string
+		let albummid: string
+		try {
+			const trackInfo = responses[0].data.track_info
+			songname = trackInfo.name
+			albummid = trackInfo.album.mid
+			const singers: any[] = trackInfo.singer
+			allSingers = ""
+			for (let singer of singers) {
+				allSingers += singer.name + ", "
+			}
+			allSingers = allSingers.substr(0, allSingers.length - 2)
+		}
+		catch(e) {
+			console.log(e)
+			res.send({errcode: 7})
 			return
 		}
 
 		const music: Music = {
-			name: body.songname,
-			artist: body.artist,
-			url: responses[0].data,
-			cover: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${body.songmid}.jpg`,
-			lyric: responses[1].data.lyric,
+			name: songname,
+			artist: allSingers,
+			url: responses[1].data,
+			cover: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${albummid}.jpg`,
+			lyric: responses[2].data.lyric,
 		}
 		room.AddSong(body.songmid, music)
 

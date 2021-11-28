@@ -124,8 +124,6 @@ async function adds(term, argv) {
 		res = await axios.post("/api/add", {
 			nick: nickname,
 			name: roomname,
-			songname: song.songname,
-			artist: song.singer,
 			songmid: song.songmid,
 			mediamid: song.strMediaMid,
 		})
