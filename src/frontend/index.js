@@ -170,3 +170,10 @@ const ap = new APlayer({
 		cover: 'cover.jpg',
 	}]
 });
+
+// socket.io
+const socket = io()
+socket.on("add", msg => {
+	console.log("add received!!!")
+	console.log(msg)
+})

@@ -37,11 +37,23 @@ class MusicRoom {
 		return true
 	}
 
+	// LeaveListener makes a listener leave this music room.
+	LeaveListener(nick: string) {
+		this.listeners.delete(nick)
+		hlog(`Listener <${nick}> leaves <${this.name}>.`)
+	}
+
 	// JoinOperator adds a new operator with given nickname into this music room
 	// if not exists.
 	JoinOperator(nick: string): void {
 		this.operators.add(nick)
 		hlog(`<${nick}> joins <${this.name}> as operator.`)
+	}
+
+	// LeaveOperator makes an operator leave this music room.
+	LeaveOperator(nick: string) {
+		this.listeners.delete(nick)
+		hlog(`Operator <${nick}> leaves <${this.name}>.`)
 	}
 
 	// IsOperator checks where a given nickname is operator or not.

@@ -18,19 +18,25 @@ async function join(term, argv) {
 		return
 	}
 
+	const joinProm = new Promise((resolve, reject) => {
+		try {
+			socket.emit("join", argv[1], argv[2], response => {
+				resolve(response)
+			})
+		}
+		catch(e) {
+			reject(e)
+		}
+	})
+
 	let res
 	try {
-		res = await axios.post("/api/join", {
-			nick: argv[1],
-			name: argv[2],
-		})
+		res = await joinProm
 	}
 	catch(e) {
 		term.writeln(e.toString())
 		return
 	}
-
-	res = res.data
 
 	if (res.errcode !== 0) {
 		term.writeln("Server side detected: you are already in a room.")

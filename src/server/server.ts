@@ -1,46 +1,13 @@
 import { Express } from "express"
+import { Server } from "socket.io";
 import { herror, hlog } from "./common";
 import { MusicRoom, Music } from "./music_room"
 const qqMusic = require('qq-music-api');
 
 let Rooms = new Map<string, MusicRoom>()
 
-function setupApi(app: Express) {
-	// Join a room with its name. Returns errcode.
-	// 0: OK.
-	// 1: The nick name is already in use.
-	// 2: Invalid format.
-	app.post("/api/join", (req, res) => {
-		const body: {
-			name: string,
-			nick: string,
-		} = req.body
-		
-		const ret = {
-			errcode: 0
-		}
-
-		// Check format
-		if (!(body.name && body.nick)) {
-			ret.errcode = 2
-			res.send(ret)
-			return
-		}
-
-		// Create a new room if not exists.
-		if (!Rooms.has(body.name)) {
-			Rooms.set(body.name, new MusicRoom(body.name))
-		}
-		
-		const room = Rooms.get(body.name)!
-		if (!room.JoinListener(body.nick)) {
-			ret.errcode = 1
-			res.send(ret)
-			return
-		}
-		room.JoinOperator(body.nick)
-		res.send(ret)
-	})
+function setupServer(app: Express, io: Server) {
+	setupIo(io)
 
 	// Set QQMusic cookie. Returns errcode.
 	// 0: OK.
@@ -176,6 +143,54 @@ function setupApi(app: Express) {
 	})
 }
 
+
+function setupIo(io: Server) {
+	io.on("connection", socket => {
+		let myNickname: string = ""
+		let myRoomname: string = ""
+
+		// Join a room with its name. Responds errcode.
+		// 0: OK.
+		// 1: The nick name is already in use.
+		// 2: Invalid format.
+		socket.on("join", (nick: string, name: string, callback) => {
+			if (!nick || !name) {
+				callback({errcode: 2})
+				return
+			}
+
+			// Create a new room if not exists.
+			if (!Rooms.has(name)) {
+				Rooms.set(name, new MusicRoom(name))
+			}
+
+			const room = Rooms.get(name)!
+			if (!room.JoinListener(nick)) {
+				callback({errcode: 1})
+				return
+			}
+			room.JoinOperator(nick)
+
+			// Add to socket.io room
+			socket.join(name)
+			myNickname = nick
+			myRoomname = name
+
+			callback({errcode: 0})
+		})
+
+		// Leave a room.
+		socket.on("disconnect", () => {
+			if (!Rooms.has(myRoomname)) {
+				return
+			}
+			const room = Rooms.get(myRoomname)!
+			room.LeaveListener(myNickname)
+			room.LeaveOperator(myNickname)
+		})
+	})
+}
+
 export {
-	setupApi
+	setupServer
 }
