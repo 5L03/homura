@@ -7,6 +7,12 @@ export interface User {
     userName: string;
 }
 
+// Information of room
+export interface Room {
+    _id: string;
+    roomName: string;
+}
+
 // 条目
 export interface Entry {
     _id: string;
@@ -21,6 +27,9 @@ export interface State {
     value: number;
 
     user: User | null;
+    room: Room | null;
+    joined: boolean;
+
     entries: Entry[];
 }
 
@@ -28,6 +37,9 @@ export const initialState: State = {
     value: 0,
 
     user: null,
+    room: null,
+    joined: false,
+
     entries: [],
 };
 
@@ -44,6 +56,20 @@ function reducer(state: State = initialState, action: Action): State {
             return {
                 ...state,
                 user: action.payload as User,
+            }
+        }
+
+        case ActionTypes.SetRoom: {
+            return {
+                ...state,
+                room: action.payload as Room,
+            }
+        }
+
+        case ActionTypes.SetJoined: {
+            return {
+                ...state,
+                joined: action.payload as boolean,
             }
         }
 

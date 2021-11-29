@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 import { ActionTypes } from '../state/action';
-import { User, Entry } from '../state/reducer';
+import {User, Entry, Room} from '../state/reducer';
 
 /**
  * 获取 redux action
@@ -20,6 +20,20 @@ export default function useAction() {
             dispatch({
                 type: ActionTypes.SetUser,
                 payload: user,
+            });
+        },
+
+        setRoom(room: Room) {
+            dispatch({
+                type: ActionTypes.SetRoom,
+                payload: room,
+            });
+        },
+
+        setJoined(joined: boolean) {
+            dispatch({
+                type: ActionTypes.SetJoined,
+                payload: joined,
             });
         },
 

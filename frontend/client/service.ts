@@ -1,13 +1,6 @@
 import axios from "axios";
 import socket from "./socket";
 
-export async function login() {
-    return {
-        _id: "01",
-        userName: "user01",
-    };
-}
-
 export async function getEntries() {
     return [
         {

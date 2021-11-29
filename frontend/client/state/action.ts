@@ -1,8 +1,10 @@
-import { User, Entry } from './reducer';
+import {User, Entry, Room} from './reducer';
 
 export enum ActionTypes {
     SetValue = 'SetValue',
     SetUser = 'SetUser',
+    SetRoom = 'SetRoom',
+    SetJoined = 'SetJoined',
     SetEntries = 'SetEntries',
     AddEntry = 'AddEntry',
 }
@@ -10,6 +12,10 @@ export enum ActionTypes {
 export type SetValuePayload = Number;
 
 export type SetUserPayload = User;
+
+export type SetRoomPayload = Room;
+
+export type SetJoinedPayload = Boolean;
 
 export type SetEntriesPayload = Entry[];
 
@@ -20,6 +26,8 @@ export interface Action {
     payload:
         | SetValuePayload
         | SetUserPayload
+        | SetRoomPayload
+        | SetJoinedPayload
         | SetEntriesPayload
         | AddEntryPayload
         | Object
