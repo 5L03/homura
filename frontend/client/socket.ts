@@ -7,6 +7,10 @@ const { dispatch } = store;
 const options = {
     // reconnectionDelay: 1000,
 };
-const socket = IO(config.server, options);
+const socket = IO();
+
+socket.on('connect', async () => {
+    console.log("socket connected")
+});
 
 export default socket;
