@@ -135,9 +135,12 @@ function setupServer(app: Express, io: Server) {
 			artist: allSingers,
 			url: responses[1].data,
 			cover: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${albummid}.jpg`,
-			lyric: responses[2].data.lyric,
+			lrc: responses[2].data.lyric,
 		}
 		room.AddSong(body.songmid, music)
+
+		// Push messages to listeners
+		io.to(body.name).emit("add", music)
 
 		res.send({errcode: 0})
 	})

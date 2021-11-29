@@ -123,7 +123,6 @@ async function adds(term, argv) {
 		return
 	}
 	const song = songmidMap.get(argv[1])
-	console.log(song)
 
 	let res
 	try {

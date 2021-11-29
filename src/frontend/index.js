@@ -162,18 +162,14 @@ function switchVisible() {
 
 // APlayer
 const ap = new APlayer({
-	container: document.getElementById('player'),
-	audio: [{
-		name: 'name',
-		artist: 'artist',
-		url: 'url.mp3',
-		cover: 'cover.jpg',
-	}]
+	container: document.getElementById("player"),
+	lrcType: 1,
+	audio: [],
 });
 
 // socket.io
 const socket = io()
-socket.on("add", msg => {
-	console.log("add received!!!")
-	console.log(msg)
+socket.on("add", music => {
+	ap.list.add(music)
+	console.log(music)
 })

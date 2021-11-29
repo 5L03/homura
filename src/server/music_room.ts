@@ -6,7 +6,7 @@ type Music = {
 	artist: string,
 	url: string,
 	cover: string,
-	lyric: string,
+	lrc: string,
 }
 
 class MusicRoom {
